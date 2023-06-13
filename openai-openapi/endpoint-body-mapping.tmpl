@@ -1,0 +1,20 @@
+// TEMP: Consider revising this in oapi-codegen to make cleaner or at least renaming....
+
+
+var EndpointToRequestBodyMap = map[string]interface{}{
+{{range .}}{{$opid := .OperationId -}}
+    {{ $reqBody := genDefaultRequestBodyType . -}}{{if ne $reqBody "" -}}
+        "{{$opid}}":{{genDefaultRequestBodyType .}}{},
+    {{end -}}
+{{end -}}
+}
+
+var EndpointConfigMap = map[string]Config{
+{{range .}}{{$opid := .OperationId -}}
+    {{ $reqBody := genDefaultRequestBodyType . -}}{{if ne $reqBody "" -}}
+        "{{$opid}}":SpecificConfig[{{genDefaultRequestBodyType .}}]{},
+    {{else -}}
+        "{{$opid}}":ConfigStub{},
+    {{end -}}
+{{end -}}
+}

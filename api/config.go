@@ -96,7 +96,7 @@ func ReadConfig(file string) (*Config, error) {
 	return c, nil
 }
 
-func (cm ConfigMerger) LoadConfigFile(file string) error {
+func (cm *ConfigMerger) LoadConfigFile(file string) error {
 	cm.Lock()
 	defer cm.Unlock()
 	c, err := ReadConfigFile(file)

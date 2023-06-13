@@ -12,6 +12,9 @@ RWKV_VERSION?=1e18b2490e7e32f6b00e16f6a9ec0dd3a3d09266
 WHISPER_CPP_VERSION?=57543c169e27312e7546d07ed0d8c6eb806ebc36
 BERT_VERSION?=6069103f54b9969c02e789d0fb12a23bd614285f
 BLOOMZ_VERSION?=1834e77b83faafe912ad4092ccf7f77937349e2f
+OPENAI_OPENAPI_REPO?=https://github.com/openai/openai-openapi.git
+OPENAI_OPENAPI_VERSION?=
+
 export BUILD_TYPE?=
 CGO_LDFLAGS?=
 CUDA_LIBPATH?=/usr/local/cuda/lib64/
@@ -62,6 +65,25 @@ endif
 .PHONY: all test build vendor
 
 all: help
+
+
+## OpenAI OpenAPI (For Model CodeGen)
+openai-openapi/spec:
+	git clone $(OPENAI_OPENAPI_REPO) ./openai-openapi/spec
+	# TODO Copy over the version pinning stuff.
+
+openai-openapi/transformed: openai-openapi/spec
+	mkdir ./openai-openapi/transformed
+	cp ./openai-openapi/spec/openapi.yaml ./openai-openapi/transformed/localai.yaml
+
+apiv2/localai.gen.go: prepare-sources
+	echo "go mod download done, running YTT"
+	# cp ./openai-openapi/transformed/localai.yaml ./openai-openapi/transformed/localai.orig.yaml
+	$(GOCMD) run github.com/vmware-tanzu/carvel-ytt/cmd/ytt --output-files ./openai-openapi/transformed -f ./openai-openapi/transformed/localai.yaml -f ./openai-openapi/localai_model_patches.yaml
+	# cp ./openai-openapi/transformed/localai.yaml ./openai-openapi/transformed/localai.mid.yaml
+	echo "YTT Done, generating code..."
+	$(GOCMD) run github.com/deepmap/oapi-codegen/cmd/oapi-codegen --config=./openai-openapi/config.yaml ./openai-openapi/transformed/localai.yaml
+
 
 ## GPT4ALL
 gpt4all:
@@ -181,7 +203,7 @@ replace:
 	$(GOCMD) mod edit -replace github.com/go-skynet/bloomz.cpp=$(shell pwd)/bloomz
 	$(GOCMD) mod edit -replace github.com/mudler/go-stable-diffusion=$(shell pwd)/go-stable-diffusion
 
-prepare-sources: go-llama go-ggml-transformers gpt4all go-rwkv whisper.cpp go-bert bloomz go-stable-diffusion replace
+prepare-sources: openai-openapi/transformed go-llama go-ggml-transformers gpt4all go-rwkv whisper.cpp go-bert bloomz go-stable-diffusion replace
 	$(GOCMD) mod download
 
 ## GENERIC
@@ -196,9 +218,12 @@ rebuild: ## Rebuilds the project
 	$(MAKE) -C bloomz clean
 	$(MAKE) build
 
-prepare: prepare-sources backend-assets/gpt4all $(OPTIONAL_TARGETS) go-llama/libbinding.a go-bert/libgobert.a go-ggml-transformers/libtransformers.a go-rwkv/librwkv.a whisper.cpp/libwhisper.a bloomz/libbloomz.a  ## Prepares for building
+prepare: prepare-sources backend-assets/gpt4all $(OPTIONAL_TARGETS) go-llama/libbinding.a go-bert/libgobert.a go-ggml-transformers/libtransformers.a go-rwkv/librwkv.a whisper.cpp/libwhisper.a bloomz/libbloomz.a apiv2/localai.gen.go ## Prepares for building
 
 clean: ## Remove build related file
+	rm -rf ./openai-openapi/spec
+	rm -rf ./openai-openapi/transformed
+	rm -f ./apiv2/localai.gen.go
 	rm -fr ./go-llama
 	rm -rf ./gpt4all
 	rm -rf ./go-gpt2

@@ -1,0 +1,16 @@
+package: apiv2
+generate:
+  models: true
+  fiber-server: true
+  strict-server: true
+output: apiv2/localai.gen.go
+output-options:
+  exclude-depreciated: true
+  additional-property-tags:
+    - yaml
+    - mapstructure
+  user-templates:
+    endpoint-body-mapping.tmpl: ./openai-openapi/endpoint-body-mapping.tmpl
+#     union.tmpl: "// SKIP"
+#     union-and-additional-properties.tmpl: "// SKIP"
+#     additional-properties.tmpl: "// SKIP"

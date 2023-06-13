@@ -1,0 +1,139 @@
+#! LocalAI Model Patches
+#! These are fed to YTT, which patches the OpenAI OpenAPI spec to include the custom attributes used by LocalAI to pass parameters and information to local models.
+#! TODO: pretty this up. Fancy YAML features will reduce code duplication, but this is a POC.
+
+#@ load("@ytt:overlay", "overlay")
+
+#@overlay/match by=overlay.all
+---
+components:
+  schemas:
+    #!
+    #! ==== Request Model Extensions ====
+    #!
+
+    #@overlay/match missing_ok=True
+    LocalAIBaseRequestExtension:
+      type: object
+      nullable: true
+      properties:
+        seed:
+          type: integer
+          nullable: true
+        debug:
+          type: boolean
+          nullable: true
+    #@overlay/match missing_ok=True
+    LocalAITextRequestExtension:
+      allOf:
+        - $ref: "#/components/schemas/LocalAIBaseRequestExtension"
+        - type: object
+          nullable: true
+          properties:
+            top_k:
+              type: integer
+              nullable: true
+            batch:
+              type: integer
+              nullable: true
+            f16:
+              type: boolean
+              nullable: true
+            ignore_eos:
+              type: boolean
+              nullable: true
+            #! skip RepeatPenalty, try using FrequencyPenalty in real model instead??
+            n_keep:
+              type: integer
+              nullable: true
+              x-go-name: Keep
+            mirostat:
+              type: integer
+              nullable: true
+            mirostat_eta:
+              type: number
+              nullable: true
+              x-go-type: float64
+            mirostat_tau:
+              type: number
+              nullable: true
+              x-go-type: float64
+            cutstrings:
+              type: array
+              items:
+                type: string
+            trimstrings:
+              type: array
+              items:
+                type: string
+    #@overlay/match missing_ok=True
+    LocalAIImageRequestExtension:
+      allOf:
+        - $ref: "#/components/schemas/LocalAIBaseRequestExtension"
+        - type: object
+          nullable: true
+          properties:
+            model:
+              type: string
+              nullable: false
+            mode:
+              type: integer
+              nullable: true
+            step:
+              type: integer
+              nullable: true
+    #@overlay/match missing_ok=True
+    LocalAIChatRequestExtension:
+      allOf:
+        - $ref: "#/components/schemas/LocalAITextRequestExtension"
+        - type: object
+          nullable: true
+          properties:
+            roles:
+              type: object
+              nullable: true
+              properties:
+                system:
+                  type: string
+                  nullable: true
+                user:
+                  type: string
+                  nullable: true
+                assistant:
+                  type: string
+                  nullable: true
+    #!
+    #! ==== x-localai-extensions for Requests ====
+    #!
+
+    CreateChatCompletionRequest:
+      properties:
+        #@overlay/match missing_ok=True
+        x-localai-extensions:
+          $ref: "#/components/schemas/LocalAIChatRequestExtension"
+    CreateCompletionRequest:
+      properties:
+        #@overlay/match missing_ok=True
+        x-localai-extensions:
+          $ref: "#/components/schemas/LocalAITextRequestExtension"
+    CreateImageRequest:
+      properties:
+        #@overlay/match missing_ok=True
+        x-localai-extensions:
+          $ref: "#/components/schemas/LocalAIImageRequestExtension"
+    #!
+    #! ==== Responses - Desirable Type Names ====
+    #!
+    
+    CreateChatCompletionResponse:
+      properties:
+        choices:
+          items:
+            #@overlay/match missing_ok=True
+            x-go-type-name: "CreateChatCompletionResponseChoice"
+    CreateCompletionResponse:
+      properties:
+        choices:
+          items:
+            #@overlay/match missing_ok=True
+            x-go-type-name: "CreateCompletionResponseChoice"
