@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/donomii/go-rwkv.cpp v0.0.0-20230619005719-f5a8c4539674
-	github.com/ggerganov/whisper.cpp/bindings/go v0.0.0-20230628193450-85ed71aaec8e
+	github.com/ggerganov/whisper.cpp/bindings/go v0.0.0-20230704172827-4774d2feb01a
 	github.com/go-audio/wav v1.1.0
 	github.com/go-skynet/bloomz.cpp v0.0.0-20230529155654-1834e77b83fa
 	github.com/go-skynet/go-bert.cpp v0.0.0-20230607105116-6069103f54b9
