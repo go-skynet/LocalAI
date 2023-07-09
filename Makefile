@@ -20,7 +20,7 @@ GPT4ALL_REPO?=https://github.com/nomic-ai/gpt4all
 GPT4ALL_VERSION?=d611d107479f3f5111f942c5e75ead9f2a3baca0
 
 # go-ggml-transformers version
-GOGGMLTRANSFORMERS_VERSION?=8e31841dcddca16468c11b2e7809f279fa76a832
+GOGGMLTRANSFORMERS_VERSION?=3fec197a1dc4f2762617f410cc994cb7ac7be828
 
 # go-rwkv version
 RWKV_REPO?=https://github.com/donomii/go-rwkv.cpp
