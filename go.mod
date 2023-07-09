@@ -27,7 +27,7 @@ require (
 	github.com/tmc/langchaingo v0.0.0-20230628165432-e510561c17f9
 	github.com/urfave/cli/v2 v2.25.7
 	github.com/valyala/fasthttp v1.48.0
-	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v3 v3.0.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 
