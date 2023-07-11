@@ -22,7 +22,7 @@ require (
 	github.com/onsi/gomega v1.27.8
 	github.com/otiai10/openaigo v1.5.2
 	github.com/rs/zerolog v1.29.1
-	github.com/sashabaranov/go-openai v1.13.0
+	github.com/sashabaranov/go-openai v1.14.0
 	github.com/swaggo/swag v1.16.1
 	github.com/tmc/langchaingo v0.0.0-20230709010448-a875e6bc0c54
 	github.com/urfave/cli/v2 v2.25.7
